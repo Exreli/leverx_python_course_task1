@@ -23,3 +23,14 @@ class Students(Rooms):
             return output_data
         else:
             raise ValueError('Room expected')
+
+
+class Output:
+    def __init__(self, format, output_data):
+        self.format = format
+        self.output_data = output_data
+
+    def output(self):
+        if self.format == 'JSON':
+            with open('output.json', 'w', encoding='utf-8') as file:
+                json.dump(self.output_data, file, indent=4)
