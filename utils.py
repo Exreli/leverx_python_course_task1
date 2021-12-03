@@ -8,11 +8,10 @@ with students.json & rooms.json
 import argparse
 import json
 from dataclasses import dataclass
-import os.path
 import xml.etree.cElementTree as ET
 
 
-def read_input_arguments():
+def read_input_arguments() -> tuple:
     """
     Reads and returns user's input arguments (absolute paths for
     students.json & rooms.json, expected output format for
@@ -26,10 +25,6 @@ def read_input_arguments():
     parser.add_argument('format', type=str, choices=['JSON', 'XML'],
                         help='Expected output format (JSON or XML)')
     args = parser.parse_args()
-    if not os.path.exists(args.students):
-        raise FileNotFoundError("Got non-existent path for students.json")
-    elif not os.path.exists(args.rooms):
-        raise FileNotFoundError("Got non-existent path for rooms.json")
     return args.students, args.rooms, args.format
 
 
@@ -52,61 +47,53 @@ class Room:
     name: str
 
 
-def read_students_from_json(path):
+def load_data_from_json(path: str, item_converter) -> list:
     """
-    Opens students.json by its absolute path and loads its data.
-    :param path: absolute path for students.json
-    :type path: str
+    Opens JSON file by its absolute path and loads its data.
 
-    :return: list of Student instances
-    """
-    with open(path, encoding='utf-8') as file:
-        students = [Student(id=item['id'], name=item['name'], room=item['room'])
-                    for item in json.load(file)]
-    return students
+    :param path: absolute path for JSON file
 
-
-def read_rooms_from_json(path):
-    """
-    Opens rooms.json by its absolute path and loads its data.
-    :param path: absolute path for rooms.json
-    :type path: str
-
-    :return: list of Room instances
+    :param item_converter: lambda constructor
+    :type item_converter: function
     """
     with open(path, encoding='utf-8') as file:
-        rooms = [Room(id=item['id'], name=item['name']) for item in json.load(file)]
-    return rooms
+        data = [item_converter(item) for item in json.load(file)]
+    return data
 
 
-def merge_students_with_rooms(students, rooms):
+class RoomsStudents:
     """
-    Creates dict with rooms data extended with data of students.
-    :param students:
-    :param rooms:
-    :return:
+    Class for working with merged students & rooms data.
     """
-    rooms_with_students = {room.id: {'name': room.name, 'students': {}} for room in rooms}
-    for student in students:
-        rooms_with_students[student.room]['students'].update({student.id: student.name})
-    return rooms_with_students
+    def __init__(self, students: list, rooms: list):
+        """
+        Creates a new RoomsStudents object with given students & rooms data.
+        """
+        self.students = students
+        self.rooms = rooms
+
+    @property
+    def merged(self) -> dict:
+        """
+        Provides dict with rooms data extended with students data.
+        """
+        data = {room.id: {'name': room.name, 'students': {}} for room in self.rooms}
+        for student in self.students:
+            data[student.room]['students'].update({student.id: student.name})
+        return data
 
 
-def create_json_output_file(data):
+def create_json_output_file(data: dict):
     """
     Creates output JSON file with resulted dict of rooms with students.
-    :param data: dict of rooms with students
-    :type data: dict
     """
     with open('rooms_with_students.json', 'w', encoding='utf-8') as file:
         json.dump(data, file, indent=4)
 
 
-def create_xml_output_file(data):
+def create_xml_output_file(data: dict):
     """
     Creates output XML file with resulted dict of rooms with students.
-    :param data: dict of rooms with students
-    :type data: dict
     """
     root = ET.Element('rooms')
     for room_id, room_data in data.items():
