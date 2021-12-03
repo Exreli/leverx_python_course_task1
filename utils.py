@@ -37,6 +37,5 @@ class Output:
                 json.dump(self.output_data, file, indent=4)
         else:
             with open('output.xml', 'w', encoding='utf-8') as file:
-                output_data = {f'Room{i}': room for i, room in enumerate(self.output_data)}
-                xmltodict.unparse(output_data, output=file, pretty=True, full_document=False)
+                xmltodict.unparse({'Rooms': self.output_data}, output=file, pretty=True, full_document=False)
 
