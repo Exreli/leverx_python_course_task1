@@ -1,19 +1,22 @@
 """
 Script for reading 2 JSON files (students.json, rooms.json),
-merging them into list of rooms with students
-and creating new JSON/XML file with resulted list.
+merging them and creating new JSON/XML file.
 """
 
-import argparse
-from utils import JSONData, Output
+from utils import *
 
-parser = argparse.ArgumentParser(description='Merging 2 JSON files to one list and '
-                                             'unloading it to JSON or XML')
-parser.add_argument('students', type=str, help='Input dir for students JSON')
-parser.add_argument('rooms', type=str, help='Input dir for rooms JSON')
-parser.add_argument('format', type=str, choices=['JSON', 'XML'], help='Output format (JSON or XML)')
-args = parser.parse_args()
 
-input_data = JSONData(args.students, args.rooms)
-output = Output(args.format, input_data.merge_data())
-output.output()
+def main():
+    """
+    Reads user's input arguments
+    """
+    students_path, rooms_path, output_format = read_input_arguments()
+    students = read_students_from_json(students_path)
+    rooms = read_rooms_from_json(rooms_path)
+    rooms_with_students = merge_students_with_rooms(students, rooms)
+    output_dict = {'JSON': create_json_output_file, 'XML': create_xml_output_file}
+    output_dict[output_format](rooms_with_students)
+
+
+if __name__ == "__main__":
+    main()
