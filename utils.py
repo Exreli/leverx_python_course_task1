@@ -8,65 +8,47 @@ import json
 import xmltodict
 
 
-class Rooms:
+class JSONData:
     """
-    Class for working with rooms.json data.
+    Class for reading and merging data
+    from JSON files (students.json, rooms.json).
     """
-    def __init__(self, path):
+    def __init__(self, students_path, rooms_path):
         """
-        Reads data from rooms.json.
+        Opens students.json & rooms.json by its absolute paths
+        and loads its data to dicts.
 
-        :param path: absolute path to file in file system
-        :type path: str
+        :param students_path: absolute path to students.json in file system
+        :type students_path: str
+
+        :param rooms_path: absolute path to rooms.json in file system
+        :type rooms_path: str
         """
-        with open(path, encoding='utf-8') as file:
-            self.data = json.load(file)
+        with open(students_path, encoding='utf-8') as students, \
+                open(rooms_path, encoding='utf-8') as rooms:
+            self.students = json.load(students)
+            self.rooms = json.load(rooms)
 
-
-class Students(Rooms):
-    """
-    Class for working with students.json data.
-    Reading data from file is same as for rooms.json.
-    """
-    @staticmethod
-    def check_for_room(other):
+    def merge_data(self):
         """
-        Check if object belongs to Rooms class.
-
-        :param other: object to check
-        :return: boolean
-        """
-        return isinstance(other, Rooms)
-
-    def merge(self, other):
-        """
-        Merges data from Students and Rooms,
-        extends contain of Rooms data dict
-        with Students data dict.
-
-        :param other: object of Rooms class
-        :type other: Rooms
-
-        :raises ValueError: if other is not instance of Rooms
+        Extends rooms.json data dict with
+        students.json data dict
 
         :return: list of rooms with students
         """
-        if Students.check_for_room(other):
-            output_data = other.data.copy()
-            for student in self.data:
-                student_no_room = student.copy()
-                del student_no_room['room']
-                output_data[student['room']]['students'] =\
-                    output_data[student['room']].get('students', []) + [student_no_room]
-            return output_data
-        else:
-            raise ValueError('Room expected')
+        merged_data = self.rooms.copy()
+        for student in self.students:
+            student_no_room = student.copy()
+            del student_no_room['room']
+            merged_data[student['room']]['students'] = \
+                merged_data[student['room']].get('students', []) + [student_no_room]
+        return merged_data
 
 
 class Output:
     """
-    Class for working with resulted list of rooms with students,
-    provides ability of creating output JSON/XML file with its data.
+    Class for creating output JSON/XML file
+    with resulted list of rooms with students.
     """
     def __init__(self, output_format, output_data):
         """
@@ -81,7 +63,7 @@ class Output:
 
     def output(self):
         """
-        Provides creating output JSON/XML file
+        Creates output JSON/XML file
         with list of rooms with students.
         """
         if self.format == 'JSON':
