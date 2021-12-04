@@ -3,7 +3,9 @@ Script for reading 2 JSON files,
 merging their data and creating new JSON/XML file.
 """
 
-from readers import read_input_arguments, load_data_from_json, Student, Room, RoomsStudents
+
+from models import Student, Room, RoomsStudents
+from readers import read_input_arguments, load_data_from_json
 from writers import JSONOutputFileWriter, XMLOutputFileWriter
 
 
