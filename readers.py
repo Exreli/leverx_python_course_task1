@@ -13,7 +13,12 @@ import re
 
 def get_available_output_formats(module=writers) -> dict:
     """
-    Returns available output formats to create
+    Returns available output formats to create.
+    Works correctly if all serializers and file-writers
+    are implemented in module 'writers.py' and their names
+    start with output format they work with, also serializers
+    must have implemented method '.serialize(self)' and file-writers
+    must have implemented method '.create(self)'.
     """
     output_formats = {}
     actions = ['serialize', 'create']
