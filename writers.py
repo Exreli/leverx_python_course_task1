@@ -8,11 +8,26 @@ import json
 import xml.etree.cElementTree as ET
 
 
-class JSONOutputFileWriter:
+class JsonSerializer:
     """
-    Class for creating output JSON file with resulted data.
+    Class for serializing given data to a JSON formatted string.
     """
-    def __init__(self, data: dict, path=r'output\output.json', encoding='utf-8'):
+    def __init__(self, data: dict):
+        self.data = data
+        self.serialized_data = self.serialize()
+
+    def serialize(self) -> str:
+        """
+        Serializes data to a JSON formatted string and returns it.
+        """
+        return json.dumps(self.data, indent=4)
+
+
+class JsonOutputFileWriter:
+    """
+    Class for creating an output JSON file with resulted data.
+    """
+    def __init__(self, data: str, path=r'output\output.json', encoding='utf-8'):
         """
         Creates a new JSONOutputFileWriter object with given data, path and encoding.
         By default the path to output file is 'output/output.json' in the current
@@ -22,33 +37,25 @@ class JSONOutputFileWriter:
         self.path = path
         self.encoding = encoding
 
-    def create_file(self):
+    def create(self):
         """
-        Creates output JSON file with resulted data.
+        Creates an output JSON file with resulted data.
         """
         with open(self.path, 'w', encoding=self.encoding) as file:
-            json.dump(self.data, file, indent=4)
+            json.dump(json.loads(self.data), file, indent=4)
 
 
-class XMLOutputFileWriter:
+class XmlSerializer:
     """
-    Class for building Element Trees by given resulted data and
-    creating output XML file with it.
+    Class for serializing given data to an XML formatted ElementTree object.
     """
-    def __init__(self, data: dict, path=r'output\output.xml', encoding='utf-8'):
-        """
-        Creates a new XMLOutputFileWriter object with given data, path and encoding.
-        By default the path to output file is 'output/output.xml' in the current
-        directory, encoding - utf-8.
-        """
+    def __init__(self, data: dict):
         self.data = data
-        self.path = path
-        self.encoding = encoding
+        self.serialized_data = self.serialize()
 
-    def build_tree(self):
+    def serialize(self) -> 'ET.ElementTree':
         """
-        Builds Element Tree with the resulted data
-        given to XMLOutputFileWriter object.
+        Serializes data to an XML formatted ElementTree object and returns it.
         """
         root = ET.Element('rooms')
         for room_id, room_data in self.data.items():
@@ -59,13 +66,27 @@ class XMLOutputFileWriter:
                 student = ET.SubElement(room, 'student', id=str(student_id))
                 student.text = student_name
         element_tree = ET.ElementTree(root)
+        ET.indent(element_tree, space='\t', level=0)
         return element_tree
 
-    def create_file(self):
+
+class XmlOutputFileWriter:
+    """
+    Class for creating an output XML file with resulted data.
+    """
+    def __init__(self, data: 'ET.ElementTree', path=r'output\output.xml', encoding='utf-8'):
         """
-        Creates output XML file with resulted data.
+        Creates a new XMLOutputFileWriter object with given data, path and encoding.
+        By default the path to output file is 'output/output.xml' in the current
+        directory, encoding - utf-8.
         """
-        element_tree = self.build_tree()
-        ET.indent(element_tree, space='\t', level=0)
+        self.data = data
+        self.path = path
+        self.encoding = encoding
+
+    def create(self):
+        """
+        Creates an output XML file with resulted data.
+        """
         with open(self.path, 'wb') as file:
-            element_tree.write(file, xml_declaration=False, encoding=self.encoding)
+            self.data.write(file, xml_declaration=False, encoding=self.encoding)

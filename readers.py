@@ -6,6 +6,24 @@ and loading JSON files.
 
 import argparse
 import json
+import writers
+import inspect
+import re
+
+
+def get_available_output_formats(module=writers) -> dict:
+    """
+    Returns available output formats to create
+    """
+    output_formats = {}
+    actions = ['serialize', 'create']
+    for name, obj in inspect.getmembers(module):
+        if inspect.isclass(obj):
+            output_format = re.search(r'[A-Z][a-z]*', name).group(0).upper()
+            for action in actions:
+                if action in obj.__dict__:
+                    output_formats[output_format] = output_formats.get(output_format, {}) | {action: obj}
+    return output_formats
 
 
 def read_input_arguments() -> tuple:
@@ -13,15 +31,16 @@ def read_input_arguments() -> tuple:
     Reads and returns user's input arguments (absolute paths for
     JSON files and expected output format for the resulted file).
     """
+    output_formats = get_available_output_formats()
     parser = argparse.ArgumentParser(
         description='Merging 2 JSON files and unloading it to JSON or XML file'
     )
     parser.add_argument('students', type=str, help='Absolute path for students.json')
     parser.add_argument('rooms', type=str, help='Absolute path for rooms.json')
-    parser.add_argument('format', type=str, choices=['JSON', 'XML'],
-                        help='Expected output format (JSON or XML)')
+    parser.add_argument('format', type=str, choices=output_formats,
+                        help=f'Expected output format')
     args = parser.parse_args()
-    return args.students, args.rooms, args.format
+    return args.students, args.rooms, args.format, output_formats
 
 
 def load_data_from_json(path: str, item_converter) -> list:
