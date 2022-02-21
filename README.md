@@ -1,3 +1,19 @@
-# Description
+# Task
 ____
-Script for loading JSON files, merging their data and creating output file with the resulted data.
+Даны 2 файла (смотрите в `/input`):
+- students.json
+- rooms.json
+
+Необходимо написать скрипт, целью которого будет загрузка этих двух файлов, объединения их в список комнат, где каждая комната содержит список студентов, которые
+находятся в этой комнате, а также последующую выгрузку их в формате JSON или XML.
+
+Необходима поддержка следующих входных параметров:
+- students # путь к файлу студентов
+- rooms # путь к файлу комнат
+- format # выходной формат (xml или json)
+
+Ожидается использование ООП и SOLID
+
+# Usage
+____
+    python main.py [students.json path] [rooms.json path] [format (JSON/XML)]
